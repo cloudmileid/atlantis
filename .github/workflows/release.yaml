@@ -1,0 +1,105 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+      - '!v*.*.*-rc'
+      - '!v*.*.*-dev'
+
+jobs:
+  build-push-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      -
+        name: Set short git commit SHA
+        run: |
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          echo "COMMIT_SHORT_SHA=$SHORT_SHA" >> $GITHUB_ENV
+
+      -
+        name: Confirm git commit SHA output
+        run: echo ${{ env.COMMIT_SHORT_SHA }}
+      -
+        name: Get tag
+        id: get-tag
+        run: |-
+          echo "TAG=${GITHUB_REF:10}" >> $GITHUB_ENV
+          echo "REPO=${GITHUB_REPOSITORY}" >> $GITHUB_ENV
+      -
+        name: Checkout
+        uses: actions/checkout@v4
+      -
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ vars.ARTIFACT_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
+      -
+        name: Setup gcloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+      -
+        name: Docker auth
+        id: artifact-auth
+        run: |-
+          gcloud auth configure-docker ${{ vars.ARTIFACT_REGION }}-docker.pkg.dev --quiet
+      -
+        name: Build, tag, and push image to GCP Artifact
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |-
+            ${{ vars.ARTIFACT_REGION }}-docker.pkg.dev/${{ vars.ARTIFACT_PROJECT_ID }}/${{ env.REPO }}:${{ env.TAG }}
+            ${{ vars.ARTIFACT_REGION }}-docker.pkg.dev/${{ vars.ARTIFACT_PROJECT_ID }}/${{ env.REPO }}:${{ env.COMMIT_SHORT_SHA }}
+            ${{ vars.ARTIFACT_REGION }}-docker.pkg.dev/${{ vars.ARTIFACT_PROJECT_ID }}/${{ env.REPO }}:latest
+
+  release:
+    needs: build-push-release
+    runs-on: ubuntu-latest
+    container:
+      image: asia-docker.pkg.dev/id-rd-ai-demo/cloudmileid/automator:latest
+      credentials:
+        username: ${{ secrets.GCP_ARTIFACT_USERNAME }}
+        password: ${{ secrets.GCP_ARTIFACT_PASSWORD }}
+      options: --user root
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      -
+        name: Before checkout
+        shell: bash
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      -
+        name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      -
+        name: Generate CHANGELOG.md
+        run: |
+          git-chglog \
+          --config /automator/.chglog/config.yml \
+          --template /automator/.chglog/CHANGELOG.tpl.md \
+          --repository-url "https://github.com/${{ github.repository }}" \
+          --output CHANGELOG.md ${{ env.TAG }}
+
+      -
+        uses: qoomon/actions--access-token@v3
+        id: access-token
+        with:
+          permissions: |
+            contents: write
+      -
+        name: Generate Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ env.TAG }}
+          body_path: CHANGELOG.md
+          token: ${{ steps.access-token.outputs.token }}

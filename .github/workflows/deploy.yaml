@@ -1,0 +1,65 @@
+name: deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to run the workflow on'
+        required: true
+        type: string
+
+jobs:
+  build-push-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag }}
+      -
+        name: Set short git commit SHA
+        run: |
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          echo "COMMIT_SHORT_SHA=$SHORT_SHA" >> $GITHUB_ENV
+
+      -
+        name: Confirm git commit SHA output
+        run: echo ${{ env.COMMIT_SHORT_SHA }}
+      -
+        name: Get repo
+        id: get-repo
+        run: |-
+          echo "REPO=${GITHUB_REPOSITORY}" >> $GITHUB_ENV
+      -
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ vars.ARTIFACT_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
+      -
+        name: Setup gcloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+      -
+        name: Docker auth
+        id: artifact-auth
+        run: |-
+          gcloud auth configure-docker ${{ vars.ARTIFACT_REGION }}-docker.pkg.dev --quiet
+
+      -
+        name: Get image digest
+        run: |
+          DIGEST=$(gcloud artifacts docker images describe ${{ vars.ARTIFACT_REGION }}-docker.pkg.dev/${{ vars.ARTIFACT_PROJECT_ID }}/${{ env.REPO }}:${{ env.COMMIT_SHORT_SHA }} --format 'value(image_summary.digest)')
+          echo "IMAGE_DIGEST=$DIGEST" >> $GITHUB_ENV
+      -
+        name: Create Release
+        run: |-
+          gcloud deploy releases create rel-${{ env.COMMIT_SHORT_SHA }} \
+            --delivery-pipeline=${{ vars.DELIVERY_PIPELINE }} \
+            --region=${{ vars.CLOUDRUN_REGION }} \
+            --images=atlantis-image=${{ vars.ARTIFACT_REGION }}-docker.pkg.dev/${{ vars.ARTIFACT_PROJECT_ID }}/${{ env.REPO }}@${{ env.IMAGE_DIGEST }} \
+            --skaffold-file=skaffold.yaml
