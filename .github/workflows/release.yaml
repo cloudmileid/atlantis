@@ -62,7 +62,7 @@ jobs:
     needs: build-push-release
     runs-on: ubuntu-latest
     container:
-      image: asia-docker.pkg.dev/id-rd-ai-demo/cloudmileid/automator:latest
+      image: us-central1-docker.pkg.dev/id-rd-ai-demo/cloudmileid/automator:latest
       credentials:
         username: ${{ secrets.GCP_ARTIFACT_USERNAME }}
         password: ${{ secrets.GCP_ARTIFACT_PASSWORD }}
