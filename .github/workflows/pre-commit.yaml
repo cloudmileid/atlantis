@@ -1,0 +1,36 @@
+name: pre-commit
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+      - main
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  pre_commit:
+    runs-on: ubuntu-latest
+    container:
+      image: us-central1-docker.pkg.dev/id-rd-ai-demo/cloudmileid/automator:latest
+      credentials:
+        username: ${{ secrets.GCP_ARTIFACT_USERNAME }}
+        password: ${{ secrets.GCP_ARTIFACT_PASSWORD }}
+      options: --user root
+    steps:
+      -
+        name: Before checkout
+        shell: bash
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      -
+        name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 20
+      -
+        name: Run pre-commit check
+        run: pre-commit run -a
