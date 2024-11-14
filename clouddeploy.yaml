@@ -1,0 +1,19 @@
+apiVersion: deploy.cloud.google.com/v1
+kind: DeliveryPipeline
+metadata:
+  name: id-rd-ai-demo-atlantis-delivery-pipeline
+description: Atlantis runner deployment pipeline
+serialPipeline:
+  stages:
+  - targetId: production
+    profiles: [production]
+
+---
+apiVersion: deploy.cloud.google.com/v1
+kind: Target
+metadata:
+  name: production
+description: Atlantis runner on production
+requireApproval: false
+run:
+  location: projects/<PROJECT_ID>/locations/us-central1

@@ -8,6 +8,8 @@ repos:
       - id: detect-private-key      # Detects the presence of private keys
       - id: check-json              # This hook checks json files for parseable syntax
       - id: check-yaml              # This hook checks yaml files for parseable syntax
+        args:
+          - --allow-multiple-documents
       - id: detect-aws-credentials  # Detects *your* aws credentials from the aws cli credentials file
         args:
           - --allow-missing-credentials
