@@ -15,10 +15,13 @@ spec:
     metadata:
       annotations:
         autoscaling.knative.dev/minScale: "0" # Having a minimum of one instance and always-on CPU helps to run longer plans.
-        autoscaling.knative.dev/maxScale: "1" # Using more than one instance may work but hasn't been tested.
+        autoscaling.knative.dev/maxScale: "5" # Using more than one instance may work but hasn't been tested.
         run.googleapis.com/cpu-throttling: "true" # Using always-on CPU is recommended for Atlantis (false).
         run.googleapis.com/startup-cpu-boost: "true"
         run.googleapis.com/execution-environment: "gen2"
+        run.googleapis.com/vpc-access-egress: "all-traffic"
+        run.googleapis.com/network-interfaces: '[{"network":"vpc-id-rd-ai-demo-prd","subnetwork":"vsub-id-rd-ai-demo-usce1-private-common","tags":["atlantis-prd"]}]'
+
     spec:
       containerConcurrency: 80
       timeoutSeconds: 300 # Might need to be increased for complex projects
@@ -37,7 +40,7 @@ spec:
             - name: ATLANTIS_ALLOW_COMMANDS
               value: 'all'
             - name: ATLANTIS_GH_TEAM_ALLOWLIST
-              value: 'delivery:plan,sa:plan,sa:apply,sa:import'
+              value: 'delivery:plan,delivery:apply,sa:plan,sa:apply,sa:import'
             - name: ATLANTIS_AUTOMERGE
               value: 'true'
             - name: ATLANTIS_EMOJI_REACTION
