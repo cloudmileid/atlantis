@@ -3,7 +3,7 @@ kind: Config
 metadata:
   name: atlantis
 profiles:
-  - name: target
+  - name: production
     manifests:
       rawYaml:
         - service.yaml
