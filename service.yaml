@@ -1,0 +1,89 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: atlantis
+  namespace: id-rd-ai-demo
+  labels:
+    cloud.googleapis.com/location: us-central1
+  annotations:
+    run.googleapis.com/launch-stage: BETA
+    run.googleapis.com/description: "Atlantis is a tool for collaborating on OpenTofu through version control."
+    run.googleapis.com/ingress: internal-and-cloud-load-balancing
+    # run.googleapis.com/binary-authorization: default
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "0" # Having a minimum of one instance and always-on CPU helps to run longer plans.
+        autoscaling.knative.dev/maxScale: "1" # Using more than one instance may work but hasn't been tested.
+        run.googleapis.com/cpu-throttling: "true" # Using always-on CPU is recommended for Atlantis (false).
+        run.googleapis.com/startup-cpu-boost: "true"
+        run.googleapis.com/execution-environment: "gen2"
+    spec:
+      containerConcurrency: 80
+      timeoutSeconds: 300 # Might need to be increased for complex projects
+      serviceAccountName: atlantis@id-rd-ai-demo.iam.gserviceaccount.com
+      containers:
+        - name: atlantis
+          image: atlantis-image # Will be replaced before deployment via Cloud Deploy (Do not change this)
+          ports:
+            - name: http1
+              containerPort: 8080
+          env:
+            - name: ATLANTIS_ATLANTIS_URL
+              value: https://atlantis.mile.codes
+            - name: ATLANTIS_GH_USER
+              value: mileops
+            - name: ATLANTIS_ALLOW_COMMANDS
+              value: 'all'
+            - name: ATLANTIS_GH_TEAM_ALLOWLIST
+              value: 'delivery:plan,sa:plan,sa:apply,sa:import'
+            - name: ATLANTIS_AUTOMERGE
+              value: 'true'
+            - name: ATLANTIS_EMOJI_REACTION
+              value: thumbsup
+            - name: ATLANTIS_GH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: sesm-id-rd-ai-demo-usce1-prd-ATLANTIS_GH_TOKEN
+                  key: latest
+            - name: ATLANTIS_GH_WEBHOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: sesm-id-rd-ai-demo-usce1-prd-ATLANTIS_GH_WEBHOOK_SECRET
+                  key: latest
+            - name: ATLANTIS_GH_ORG
+              value: cloudmileid
+            - name: ATLANTIS_ENABLE_DIFF_MARKDOWN_FORMAT
+              value: 'true'
+            - name: ATLANTIS_REPO_ALLOWLIST
+              value: github.com/cloudmileid/*
+            - name: ATLANTIS_PORT
+              value: '8080'
+            - name: ATLANTIS_REPO_CONFIG
+              value: /app/repos.yaml
+            - name: ATLANTIS_HIDE_PREV_PLAN_COMMENTS
+              value: 'true'
+            - name: ATLANTIS_DATA_DIR
+              value: /app/atlantis
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 2Gi
+          volumeMounts:
+            - name: atlantis_volume
+              mountPath: /app/atlantis
+          startupProbe:
+            timeoutSeconds: 240
+            periodSeconds: 240
+            failureThreshold: 3
+            tcpSocket:
+              port: 8080
+      volumes:
+        - name: atlantis_volume
+          csi:
+            driver: gcsfuse.run.googleapis.com
+            readOnly: false
+            volumeAttributes:
+              bucketName: gcsb-id-rd-ai-demo-usce1-atlantis
+              mountOptions: uid=100,gid=1000,file-mode=0744
