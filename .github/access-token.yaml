@@ -11,7 +11,7 @@ statements:
       codespaces-lifecycle-admin: read
       codespaces-metadata: read
       codespaces-secrets: read # write
-      contents: read
+      contents: write
       custom-properties: read
       dependabot-secrets: read
       deployments: read
