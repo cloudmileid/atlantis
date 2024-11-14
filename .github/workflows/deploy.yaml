@@ -2,11 +2,6 @@ name: deploy
 
 on:
   workflow_dispatch:
-    inputs:
-      tag:
-        description: 'Tag to run the workflow on'
-        required: true
-        type: string
 
 jobs:
   build-push-release:
@@ -19,8 +14,6 @@ jobs:
       -
         name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.inputs.tag }}
       -
         name: Set short git commit SHA
         run: |
