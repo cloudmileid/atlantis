@@ -37,6 +37,8 @@ spec:
               value: https://atlantis.mile.codes
             - name: ATLANTIS_GH_USER
               value: mileops
+            - name: ATLANTIS_GH_APP_ID
+              value: 1063579
             - name: ATLANTIS_ALLOW_COMMANDS
               value: 'all'
             - name: ATLANTIS_GH_TEAM_ALLOWLIST
@@ -44,7 +46,7 @@ spec:
             - name: ATLANTIS_AUTOMERGE
               value: 'true'
             - name: ATLANTIS_EMOJI_REACTION
-              value: thumbsup
+              value: 'heart'
             - name: ATLANTIS_GH_TOKEN
               valueFrom:
                 secretKeyRef:
@@ -74,6 +76,8 @@ spec:
               value: 'true'
             - name: ATLANTIS_DATA_DIR
               value: /app/atlantis
+            - name: ATLANTIS_GH_APP_KEY_FILE
+              value: /app/atlantis/app-key.pem
           resources:
             limits:
               cpu: 1000m
