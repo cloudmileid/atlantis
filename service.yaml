@@ -106,4 +106,4 @@ spec:
             readOnly: false
             volumeAttributes:
               bucketName: gcsb-id-rd-ai-demo-usce1-atlantis
-              mountOptions: uid=1000,gid=1000,allow_other,file-mode=777,dir_mode=777
+              mountOptions: uid=1000,gid=1000,file-mode=777,dir_mode=777
