@@ -37,8 +37,6 @@ spec:
               value: https://atlantis.mile.codes
             - name: ATLANTIS_GH_USER
               value: mileops
-            - name: ATLANTIS_GH_APP_ID
-              value: 1063579
             - name: ATLANTIS_ALLOW_COMMANDS
               value: 'all'
             - name: ATLANTIS_GH_TEAM_ALLOWLIST
@@ -47,21 +45,8 @@ spec:
               value: 'true'
             - name: ATLANTIS_EMOJI_REACTION
               value: 'heart'
-            - name: ATLANTIS_GH_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: sesm-id-rd-ai-demo-usce1-prd-ATLANTIS_GH_TOKEN
-                  key: latest
-            - name: ATLANTIS_GH_WEBHOOK_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: sesm-id-rd-ai-demo-usce1-prd-ATLANTIS_GH_WEBHOOK_SECRET
-                  key: latest
-            - name: CLOUDFLARE_API_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: sesm-id-rd-ai-demo-usce1-prd-CLOUDFLARE_API_TOKEN
-                  key: latest
+            - name: ATLANTIS_WRITE_GIT_CREDS
+              value: 'true'
             - name: ATLANTIS_GH_ORG
               value: cloudmileid
             - name: ATLANTIS_ENABLE_DIFF_MARKDOWN_FORMAT
@@ -76,8 +61,31 @@ spec:
               value: 'true'
             - name: ATLANTIS_DATA_DIR
               value: /app/atlantis
-            - name: ATLANTIS_GH_APP_KEY_FILE
-              value: /app/atlantis/app-key.pem
+            - name: ATLANTIS_GH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: sesm-id-rd-ai-demo-usce1-prd-ATLANTIS_GH_TOKEN
+                  key: latest
+            - name: ATLANTIS_GH_APP_ID
+              valueFrom:
+                secretKeyRef:
+                  name: sesm-id-rd-ai-demo-usce1-prd-ATLANTIS_GH_APP_ID
+                  key: latest
+            - name: ATLANTIS_GH_WEBHOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: sesm-id-rd-ai-demo-usce1-prd-ATLANTIS_GH_WEBHOOK_SECRET
+                  key: latest
+            - name: CLOUDFLARE_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: sesm-id-rd-ai-demo-usce1-prd-CLOUDFLARE_API_TOKEN
+                  key: latest
+            - name: ATLANTIS_GH_APP_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: sesm-id-rd-ai-demo-usce1-prd-ATLANTIS_GH_APP_KEY
+                  key: latest
           resources:
             limits:
               cpu: 1000m
