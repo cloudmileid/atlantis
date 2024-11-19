@@ -55,6 +55,11 @@ spec:
                 secretKeyRef:
                   name: sesm-id-rd-ai-demo-usce1-prd-ATLANTIS_GH_WEBHOOK_SECRET
                   key: latest
+            - name: CLOUDFLARE_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: sesm-id-rd-ai-demo-usce1-prd-CLOUDFLARE_API_TOKEN
+                  key: latest
             - name: ATLANTIS_GH_ORG
               value: cloudmileid
             - name: ATLANTIS_ENABLE_DIFF_MARKDOWN_FORMAT
