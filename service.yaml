@@ -34,9 +34,9 @@ spec:
               containerPort: 8080
           env:
             - name: ATLANTIS_ATLANTIS_URL
-              value: https://atlantis.mile.codes
+              value: 'https://atlantis.mile.codes'
             - name: ATLANTIS_GH_USER
-              value: mileops
+              value: 'mileops'
             - name: ATLANTIS_ALLOW_COMMANDS
               value: 'all'
             - name: ATLANTIS_GH_TEAM_ALLOWLIST
@@ -48,19 +48,19 @@ spec:
             - name: ATLANTIS_WRITE_GIT_CREDS
               value: 'true'
             - name: ATLANTIS_GH_ORG
-              value: cloudmileid
+              value: 'cloudmileid'
             - name: ATLANTIS_ENABLE_DIFF_MARKDOWN_FORMAT
               value: 'true'
             - name: ATLANTIS_REPO_ALLOWLIST
-              value: github.com/cloudmileid/*
+              value: 'github.com/cloudmileid/*'
             - name: ATLANTIS_PORT
               value: '8080'
             - name: ATLANTIS_REPO_CONFIG
-              value: /app/repos.yaml
+              value: '/app/repos.yaml'
             - name: ATLANTIS_HIDE_PREV_PLAN_COMMENTS
               value: 'true'
             - name: ATLANTIS_DATA_DIR
-              value: /app/atlantis
+              value: '/app/atlantis'
             - name: ATLANTIS_GH_TOKEN
               valueFrom:
                 secretKeyRef:
